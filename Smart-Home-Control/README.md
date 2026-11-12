@@ -4,7 +4,6 @@ Python TCP socket project for SE239.
 
 ## Requirements
 - Python 3
-- No third-party packages are required.
 
 ## Week 6: First connection
 1. Open a terminal in the `Week6` folder.
@@ -47,4 +46,3 @@ Devices:
 ## Important
 The server stores the shared device state. All connected clients communicate with the same server, so a change made by one client is visible when another client runs `LIST`.
 
-The code is a starting implementation. Run the tests on your team's computers, understand the code, and make commits from every team member. Follow your instructor's AI-use acknowledgement policy.
