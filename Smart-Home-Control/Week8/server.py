@@ -11,23 +11,19 @@ import threading
 HOST = "127.0.0.1"
 PORT = 5000
 
-# All clients see the same device values because they live on the server.
 devices = {
     "light": "OFF",
-    "fan": "OFF",
+    "fan": "ON",
     "lock": "LOCKED",
 }
 
-# These shared collections are protected by the same lock.
 online_users = set()
 state_lock = threading.Lock()
 
-# Send a message to the client, ending it with a new line.
 def send_line(connection, message):
     """Send one complete text line to a client."""
     connection.sendall((message + "\n").encode("utf-8"))
 
-# Handle communication with one connected client.
 def handle_client(connection, address):
     """Handle one client independently in its own thread."""
     username = None
@@ -37,7 +33,7 @@ def handle_client(connection, address):
     try:
         send_line(connection, "WELCOME Send: LOGIN <username>")
 
-        # Keep reading commands from this client until it disconnects.
+        
         for raw_line in reader:
             message = raw_line.strip()
             if not message:
@@ -47,7 +43,7 @@ def handle_client(connection, address):
             parts = message.split()
             command = parts[0].upper()
 
-            # A client must log in before using the smart-home commands.
+            
             if username is None:
                 if command != "LOGIN" or len(parts) != 2:
                     send_line(connection, "ERR please_login_first")
@@ -65,7 +61,7 @@ def handle_client(connection, address):
                 send_line(connection, f"OK LOGIN {username}")
                 continue
 
-            # Return the current status of all smart-home devices.
+            
             if command == "LIST" and len(parts) == 1:
                 with state_lock:
                     status = (
@@ -74,7 +70,7 @@ def handle_client(connection, address):
                     )
                 send_line(connection, status)
 
-            # Check and update the requested device state.
+            
             elif command == "SET" and len(parts) == 3:
                 device = parts[1].lower()
                 value = parts[2].upper()
@@ -94,7 +90,7 @@ def handle_client(connection, address):
                         devices[device] = value
                     send_line(connection, f"OK {device} {value}")
 
-            # Allow the client to leave the server safely.
+            
             elif command == "QUIT" and len(parts) == 1:
                 send_line(connection, "OK BYE")
                 break
@@ -105,7 +101,7 @@ def handle_client(connection, address):
     except (ConnectionError, OSError) as error:
         print(f"Connection problem with {address}: {error}")
 
-    # Remove the username and close the connection when finished.
+    
     finally:
         if username is not None:
             with state_lock:
@@ -118,7 +114,7 @@ def handle_client(connection, address):
         connection.close()
         print(f"Connection closed: {address}")
 
-# Start the server and wait for clients to connect.
+
 def main():
     """Start the server and create a new thread for every client."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
@@ -129,7 +125,7 @@ def main():
         print("Waiting for clients... Press Ctrl+C to stop.")
 
         try:
-            # Accept new clients and start a separate thread for each one.
+            
             while True:
                 connection, address = server.accept()
                 client_thread = threading.Thread(
